@@ -1,8 +1,11 @@
+import csv
 import curses
 from curses import wrapper
 from curses import KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT
 import time
 import random
+from operator import itemgetter
+import pickle
 
 screen = curses.initscr()
 dims = screen.getmaxyx()
@@ -26,8 +29,6 @@ def game(screen):
     screen.border()
 
     screen.addstr(0, (dims[1] - len(title)) // 2, title)
-    nam = "© cickib"
-    screen.addstr(dims[0] - 1, dims[1] - 2 * len(nam), nam)
     direction = 0  # 0-right, 1-down, 2-left, 3, up
     game_over = False
     foodmade = False
@@ -91,11 +92,10 @@ def game(screen):
         else:
             time.sleep(15.0 * speed[difficulty] / len(body))
     screen.clear()
-
     screen.nodelay(0)
+    score = (len(body) - start_length)
     message1 = "Game Over Fucker!"
-    message2 = "You got " + \
-        str((len(body) - start_length) // growby) + " points."
+    message2 = "You got " + str(score) + " points."
     message3 = "Press Space to play again."
     message4 = "Press Esc to quit."
     message5 = "Press M to go back to the menu."
@@ -104,6 +104,9 @@ def game(screen):
     screen.addstr(dims[0] // 2, (dims[1] - len(message3)) // 2, message3)
     screen.addstr(dims[0] // 2 + 1, (dims[1] - len(message4)) // 2, message4)
     screen.addstr(dims[0] // 2 + 2, (dims[1] - len(message5)) // 2, message5)
+    with open("high_score.txt", 'a') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(str(score))
     screen.refresh()
     q = 0
     while q not in [32, 27, 77, 109]:
@@ -124,23 +127,21 @@ def menu(screen):
     selection = -1
     option = 0
     while selection < 0:
-	# This line means graphics will first look like [curses.A_REVERSE, 0, 0, 0, 0]
-	# and the option number will determine where the attribute goes.
-        graphics = [0] * 5
+        # This line means graphics will first look like [curses.A_REVERSE, 0, 0, 0, 0]
+        # and the option number will determine where the attribute goes.
+        graphics = [0] * 6
         graphics[option] = curses.A_REVERSE
         screen.addstr(dims[0] // 2 - 2, dims[1] // 2 - 2, "Play", graphics[0])
         screen.addstr(dims[0] // 2 - 1, dims[1] // 2 - 2, "Info", graphics[1])
-        screen.addstr(
-            dims[0] // 2, dims[1] // 2 - 6, "Game Options", graphics[2])
-        screen.addstr(dims[0] // 2 + 1, dims[
-                      1] // 2 - 5, "High Score", graphics[3])
+        screen.addstr(dims[0] // 2, dims[1] // 2 - 6, "Game Options", graphics[2])
+        screen.addstr(dims[0] // 2 + 1, dims[1] // 2 - 5, "High Score", graphics[3])
         screen.addstr(dims[0] // 2 + 2, dims[1] // 2 - 2, "Exit", graphics[4])
         screen.refresh()
         action = screen.getch()
         if action == curses.KEY_UP:
-            option = (option - 1) % 5
+            option = (option - 1) % 6
         elif action == curses.KEY_DOWN:
-                option = (option + 1) % 5
+                option = (option + 1) % 6
         elif action == ord("\n"):
             selection = option
     if selection == 0:
@@ -149,6 +150,8 @@ def menu(screen):
         info(screen)
     elif selection == 2:
         gameOptions(screen)
+    elif selection == 3:
+        high_scores(screen)
 
 
 def info(screen):
@@ -220,4 +223,44 @@ def gameOptions(screen):
         if selection < 4:
             selection = -1
     menu(screen)
+
+
+def high_scores(screen):
+    screen.clear()
+    screen.nodelay(0)
+    high_scores = [('Liz', 1800), ('Desi', 5000), ('Mike', 3200), ('John', 2000)]
+    with open("high_score.txt") as csvfile:
+        new_inv = {}
+        readCSV = csv.reader(csvfile)
+        highest = []
+        for row in readCSV:
+            highest.append(row)
+    highest = sorted(highest, reverse=True)[:10]
+    for i in range(len(highest)):
+        screen.addstr(i+5, 10, str(highest[i]))
+        screen.refresh()
+    screen.refresh()
+    screen.getch()
+    menu(screen)
+
+
+    # high_scores = [('Liz', 1800), ('Desi', 5000), ('Mike', 3200), ('John', 2000)]
+    # for i in range(5):
+    #     screen.addstr(i+5, 10, str(high_scores[i]))
+    #     screen.refresh()
+    # high_scores.append(('Dave', 3300))
+    # high_scores = sorted(high_scores, key=itemgetter(1), reverse=True)[:10]
+    #
+    # with open('highscores.txt', 'w') as f:
+    #     pickle.dump(high_scores, f)
+
+
+# unpickle
+    # high_scores = []
+
+    # with open('highscores.txt', 'r') as f:
+    #     high_scores = pickle.load(f)
+
+
+
 wrapper(menu)
