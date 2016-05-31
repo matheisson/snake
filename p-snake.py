@@ -20,14 +20,14 @@ accel = True
 def game(screen):
     screen.clear()
     dims = screen.getmaxyx()
-    curses.use_default_colors()
+    # curses.use_default_colors()
     screen.nodelay(1)
     curses.curs_set(0)
     screen.keypad(1)
     head = [1, 1]
     body = [head[:]] * start_length
     screen.border()
-
+    curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLUE)
     screen.addstr(0, (dims[1] - len(title)) // 2, title)
     direction = 0  # 0-right, 1-down, 2-left, 3, up
     game_over = False
@@ -46,6 +46,7 @@ def game(screen):
             screen.addch(deadcell[0], deadcell[1], " ")
 # screen.addch(head[0], head[1], "x", curses.color_pair(g))
         screen.addch(head[0], head[1], "x")
+        screen.addch(head[0], head[1], "x", curses.color_pair(1))
         action = screen.getch()
         if action == curses.KEY_UP and direction != 1:
             direction = 3
@@ -228,14 +229,12 @@ def gameOptions(screen):
 def high_scores(screen):
     screen.clear()
     screen.nodelay(0)
-    high_scores = [('Liz', 1800), ('Desi', 5000), ('Mike', 3200), ('John', 2000)]
     with open("high_score.txt") as csvfile:
-        new_inv = {}
         readCSV = csv.reader(csvfile)
         highest = []
         for row in readCSV:
             highest.append(row)
-    highest = sorted(highest, reverse=True)[:10]
+    highest = tuple(sorted(highest, reverse=True)[:10])
     for i in range(len(highest)):
         screen.addstr(i+5, 10, str(highest[i]))
         screen.refresh()
