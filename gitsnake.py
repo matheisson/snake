@@ -25,11 +25,12 @@ def game(screen):
     curses.curs_set(0)
     screen.keypad(1)
     head = [1, 1]
-    body = [head[:]] * start_length
+    body = ([head[:]] * start_length)
     # head1 = [1, 1]
     screen.border()
     curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLUE)
-    curses.init_pair(2, curses.COLOR_RED, curses.COLOR_BLUE)
+    curses.init_pair(2, curses.COLOR_BLACK, curses.COLOR_BLUE)
+    curses.init_pair(3, curses.COLOR_BLACK, curses.COLOR_RED)
     screen.addstr(0, (dims[1] - len(title)) // 2, title)
     direction = 0  # 0-right, 1-down, 2-left, 3, up
     game_over = False
@@ -50,7 +51,7 @@ def game(screen):
             screen.addch(deadcell[0], deadcell[1], " ")
 # screen.addch(head[0], head[1], "x", curses.color_pair(g))
     #    screen.addch(head1[0], head1[1], "█")
-        screen.addch(head[0], head[1], "O", curses.color_pair(1))
+        screen.addch(head[0], head[1], "█", curses.color_pair(1))
         action = screen.getch()
         if action == curses.KEY_UP and direction != 1:
             direction = 3
@@ -74,16 +75,12 @@ def game(screen):
 
         if direction == 0:
             head[1] += 1
-            # screen.addch(head[0], head[1], "R")
         elif direction == 2:
             head[1] -= 1
-            # screen.addch(head[0], head[1], "R")
         elif direction == 1:
             head[0] += 1
-            # screen.addch(head[0], head[1], "R")
         elif direction == 3:
             head[0] -= 1
-        #screen.addch(head[0], head[1], "█")
 
         deadcell = body[-1][:]
         for z in range(len(body) - 1, 0, -1):
@@ -97,13 +94,12 @@ def game(screen):
                 x -= 1
 
     # addig megy, amíg olyasmibe nem ütközik, ami nem space => fal
-        if (screen.addch(head[0], head[1])) != ord(" "):
+        if screen.inch(head[0], head[1]) != ord(" "):
             if screen.inch(head[0], head[1]) == ord(food_type[ff]):
                 foodmade = False
+                screen.addstr(head[0], head[1], "*", curses.color_pair(3))
                 for g in range(growby):
                     body.append(body[-1])
-            # elif (head[0], head[1] == "█"):
-            #     pass
             else:
                 game_over = True
         screen.refresh()
@@ -111,9 +107,12 @@ def game(screen):
             time.sleep(speed[difficulty])
         else:
             time.sleep(15.0 * speed[difficulty] / len(body))
+        score = (len(body) - start_length)
+        score_str = "SCORE: " + str(score)
+        screen.addstr(0, (curses.COLS - len(score_str)) // 7, score_str)
     screen.clear()
     screen.nodelay(0)
-    score = (len(body) - start_length)
+
     message1 = "Game Over Fucker!"
     message2 = "You got " + str(score) + " points."
     message3 = "Press Space to play again."
