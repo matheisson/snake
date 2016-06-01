@@ -5,32 +5,37 @@ from curses import KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT
 import time
 import random
 from operator import itemgetter
-import pickle
+import math
 
 screen = curses.initscr()
 dims = screen.getmaxyx()
+
 title = " CuRsEsSnAkE "
 start_length = 5
 growby = 1
 speed = {"Easy": 0.2, "Medium": 0.09, "Hard": 0.05}
 difficulty = "Medium"
 accel = True
+curses.start_color()
+curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_GREEN)
+curses.init_pair(2, curses.COLOR_GREEN, curses.COLOR_BLACK)
+curses.init_pair(3, curses.COLOR_BLACK, curses.COLOR_RED)
 
 
 def game(screen):
     screen.clear()
     dims = screen.getmaxyx()
-    # curses.use_default_colors()
+    curses.use_default_colors()
     screen.nodelay(1)
     curses.curs_set(0)
     screen.keypad(1)
+    curses.start_color()
+    # screen.bkgd(' ', curses.color_pair(2))
     head = [1, 1]
     body = ([head[:]] * start_length)
     # head1 = [1, 1]
     screen.border()
-    curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLUE)
-    curses.init_pair(2, curses.COLOR_BLACK, curses.COLOR_BLUE)
-    curses.init_pair(3, curses.COLOR_BLACK, curses.COLOR_RED)
+
     screen.addstr(0, (dims[1] - len(title)) // 2, title)
     direction = 0  # 0-right, 1-down, 2-left, 3, up
     game_over = False
@@ -51,7 +56,7 @@ def game(screen):
             screen.addch(deadcell[0], deadcell[1], " ")
 # screen.addch(head[0], head[1], "x", curses.color_pair(g))
     #    screen.addch(head1[0], head1[1], "█")
-        screen.addch(head[0], head[1], "█", curses.color_pair(1))
+        screen.addch(head[0], head[1], "█", curses.color_pair(2))
         action = screen.getch()
         if action == curses.KEY_UP and direction != 1:
             direction = 3
@@ -107,7 +112,7 @@ def game(screen):
             time.sleep(speed[difficulty])
         else:
             time.sleep(15.0 * speed[difficulty] / len(body))
-        score = (len(body) - start_length)
+        score = int(len(body) - start_length)
         score_str = "SCORE: " + str(score)
         screen.addstr(0, (curses.COLS - len(score_str)) // 7, score_str)
     screen.clear()
@@ -142,6 +147,7 @@ def menu(screen):
     curses.curs_set(0)
     screen.nodelay(0)
     screen.border()
+    # screen.bkgd(' ', curses.color_pair(1))
     curses.use_default_colors()
     screen.clear()
     selection = -1
@@ -149,7 +155,7 @@ def menu(screen):
     while selection < 0:
         # This line means graphics will first look like [curses.A_REVERSE, 0, 0, 0, 0]
         # and the option number will determine where the attribute goes.
-        graphics = [0] * 6
+        graphics = [0] * 5
         graphics[option] = curses.A_REVERSE
         screen.addstr(dims[0] // 2 - 2, dims[1] // 2 - 2, "Play", graphics[0])
         screen.addstr(dims[0] // 2 - 1, dims[1] // 2 - 2, "Info", graphics[1])
@@ -258,13 +264,16 @@ def high_scores(screen):
         readCSV = csv.reader(csvfile)
         highest = []
         for row in readCSV:
+            row = int(row[0])
             highest.append(row)
     highest = (sorted(highest, reverse=True))[:10]
-
     for i in range(len(highest)):
         s = str(i + 1) + "."
-        screen.addstr(i+5, (dims[1] - len(highest[i])) // 2-4, (str(s)))
-        screen.addstr(i+5, (dims[1] - len(highest[i])) // 2, str(highest[i]))
+        g = int(highest[i])
+        screen.addstr(i+5, (dims[1] - len(str(highest[i]))) // 2-2, "{0} {1}".format(s, g))
+        # screen.addstr(i+5, (dims[1] - (int(math.log10(int(highest[i])))+1) // 2-5, "{0} {1}".format(s, g)))
+        # screen.addstr(i+5, (dims[1] - len(highest[i])) // 2-4, "{0} {1}".format(s, str(highest[i])))
+        # screen.addstr(i+5, (dims[1] - len(highest[i])) // 2, str(highest[i]))
         screen.refresh()
     screen.refresh()
     screen.getch()
