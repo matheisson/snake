@@ -9,7 +9,7 @@ import pickle
 
 screen = curses.initscr()
 dims = screen.getmaxyx()
-title = " 💩 CuRsEsSnAkE 💩  "
+title = " CuRsEsSnAkE "
 start_length = 5
 growby = 1
 speed = {"Easy": 0.2, "Medium": 0.09, "Hard": 0.05}
@@ -26,8 +26,10 @@ def game(screen):
     screen.keypad(1)
     head = [1, 1]
     body = [head[:]] * start_length
+    # head1 = [1, 1]
     screen.border()
-    curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLUE)
+    curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLUE)
+    curses.init_pair(2, curses.COLOR_BLACK, curses.COLOR_BLUE)
     screen.addstr(0, (dims[1] - len(title)) // 2, title)
     direction = 0  # 0-right, 1-down, 2-left, 3, up
     game_over = False
@@ -41,12 +43,14 @@ def game(screen):
             if screen.inch(y, x) == ord(" "):
                 foodmade = True
 #                g = random.randint(1, 3)
-                screen.addch(y, x, ord("#"))
+                food_type = ["#", "@", "%"]
+                ff = random.randint(0, 2)
+                screen.addch(y, x, ord(food_type[ff]))
         if deadcell not in body:
             screen.addch(deadcell[0], deadcell[1], " ")
 # screen.addch(head[0], head[1], "x", curses.color_pair(g))
-        screen.addch(head[0], head[1], "x")
-        screen.addch(head[0], head[1], "x", curses.color_pair(1))
+    #    screen.addch(head1[0], head1[1], "█")
+        screen.addch(head[0], head[1], "█", curses.color_pair(1))
         action = screen.getch()
         if action == curses.KEY_UP and direction != 1:
             direction = 3
@@ -59,6 +63,15 @@ def game(screen):
         if action == 27:
             # exit()
             break
+        # if direction == 0:
+        #     head1[1] += 1
+        # elif direction == 2:
+        #     head1[1] -= 1
+        # elif direction == 1:
+        #     head1[0] += 1
+        # elif direction == 3:
+        #     head1[0] -= 1
+
         if direction == 0:
             head[1] += 1
         elif direction == 2:
@@ -81,7 +94,7 @@ def game(screen):
 
     # addig megy, amíg olyasmibe nem ütközik, ami nem space => fal
         if screen.inch(head[0], head[1]) != ord(" "):
-            if screen.inch(head[0], head[1]) == ord("#"):
+            if screen.inch(head[0], head[1]) == ord(food_type[ff]):
                 foodmade = False
                 for g in range(growby):
                     body.append(body[-1])
@@ -123,6 +136,7 @@ def game(screen):
 def menu(screen):
     curses.curs_set(0)
     screen.nodelay(0)
+    screen.border()
     curses.use_default_colors()
     screen.clear()
     selection = -1
@@ -140,9 +154,9 @@ def menu(screen):
         screen.refresh()
         action = screen.getch()
         if action == curses.KEY_UP:
-            option = (option - 1) % 6
+            option = (option - 1) % 5
         elif action == curses.KEY_DOWN:
-                option = (option + 1) % 6
+                option = (option + 1) % 5
         elif action == ord("\n"):
             selection = option
     if selection == 0:
@@ -158,7 +172,8 @@ def menu(screen):
 def info(screen):
     screen.clear()
     screen.nodelay(0)
-    infos_top = [" 💩  CuRsEsSnAkE 💩  "]
+    screen.border()
+    infos_top = [" CuRsEsSnAkE "]
     infos_center = [
         "Use the arrow keys to move.", "Don't run into the wall, title, or yourself.",
         "Collect food to grow.", "\n", "And remember, that the snake gets longer as well as FASTER."]
@@ -179,6 +194,7 @@ def info(screen):
 def gameOptions(screen):
     global start_length, growby, difficulty, accel
     screen.clear()
+    # screen.border()
     selection = -1
     option = 0
     while selection < 4:
@@ -229,37 +245,24 @@ def gameOptions(screen):
 def high_scores(screen):
     screen.clear()
     screen.nodelay(0)
+    screen.border()
+    high_score_top = [" CuRsEsSnAkE "]
+    for t in range(len(high_score_top)):
+        screen.addstr(t + 1, (dims[1] - len(high_score_top[t])) // 2, high_score_top[t])
     with open("high_score.txt") as csvfile:
         readCSV = csv.reader(csvfile)
         highest = []
         for row in readCSV:
             highest.append(row)
-    highest = tuple(sorted(highest, reverse=True)[:10])
+    highest = (sorted(highest, reverse=True))[:10]
+
     for i in range(len(highest)):
-        screen.addstr(i+5, 10, str(highest[i]))
+        s = str(i + 1) + "."
+        screen.addstr(i+5, (dims[1] - len(highest[i])) // 2-4, (str(s)))
+        screen.addstr(i+5, (dims[1] - len(highest[i])) // 2, str(highest[i]))
         screen.refresh()
     screen.refresh()
     screen.getch()
     menu(screen)
-
-
-    # high_scores = [('Liz', 1800), ('Desi', 5000), ('Mike', 3200), ('John', 2000)]
-    # for i in range(5):
-    #     screen.addstr(i+5, 10, str(high_scores[i]))
-    #     screen.refresh()
-    # high_scores.append(('Dave', 3300))
-    # high_scores = sorted(high_scores, key=itemgetter(1), reverse=True)[:10]
-    #
-    # with open('highscores.txt', 'w') as f:
-    #     pickle.dump(high_scores, f)
-
-
-# unpickle
-    # high_scores = []
-
-    # with open('highscores.txt', 'r') as f:
-    #     high_scores = pickle.load(f)
-
-
 
 wrapper(menu)
