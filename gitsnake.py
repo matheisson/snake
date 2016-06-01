@@ -10,7 +10,7 @@ import math
 screen = curses.initscr()
 dims = screen.getmaxyx()
 
-title = " CuRsEsSnAkE "
+title = " !WELCOME TO PYTHON! "
 start_length = 5
 growby = 1
 speed = {"Easy": 0.2, "Medium": 0.09, "Hard": 0.05}
@@ -49,14 +49,14 @@ def game(screen):
             if screen.inch(y, x) == ord(" "):
                 foodmade = True
 #                g = random.randint(1, 3)
-                food_type = ["#", "@", "%"]
-                ff = random.randint(0, 2)
-                screen.addch(y, x, ord(food_type[ff]))
+                food_type = ["🐥", "🔰", "🍦"]
+                food_type_index = random.randint(0, 2)
+                screen.addch(y, x, food_type[food_type_index])
         if deadcell not in body:
             screen.addch(deadcell[0], deadcell[1], " ")
 # screen.addch(head[0], head[1], "x", curses.color_pair(g))
-    #    screen.addch(head1[0], head1[1], "█")
-        screen.addch(head[0], head[1], "█", curses.color_pair(2))
+    #    screen.addch(head1[0], head1[1], "🏮")
+        screen.addch(head[0], head[1], "🏮", curses.color_pair(2))
         action = screen.getch()
         if action == curses.KEY_UP and direction != 1:
             direction = 3
@@ -100,7 +100,7 @@ def game(screen):
 
     # addig megy, amíg olyasmibe nem ütközik, ami nem space => fal
         if screen.inch(head[0], head[1]) != ord(" "):
-            if screen.inch(head[0], head[1]) == ord(food_type[ff]):
+            if screen.inch(head[0], head[1]) == ord(food_type[food_type_index]):
                 foodmade = False
                 screen.addstr(head[0], head[1], "*", curses.color_pair(3))
                 for g in range(growby):
@@ -184,7 +184,7 @@ def info(screen):
     screen.clear()
     screen.nodelay(0)
     screen.border()
-    infos_top = [" CuRsEsSnAkE "]
+    infos_top = [" !WELCOME TO PYTHON! "]
     infos_center = [
         "Use the arrow keys to move.", "Don't run into the wall, title, or yourself.",
         "Collect food to grow.", "\n", "And remember, that the snake gets longer as well as FASTER."]
@@ -257,7 +257,7 @@ def high_scores(screen):
     screen.clear()
     screen.nodelay(0)
     screen.border()
-    high_score_top = [" CuRsEsSnAkE "]
+    high_score_top = [" !WELCOME TO PYTHON! "]
     for t in range(len(high_score_top)):
         screen.addstr(t + 1, (dims[1] - len(high_score_top[t])) // 2, high_score_top[t])
     with open("high_score.txt") as csvfile:
