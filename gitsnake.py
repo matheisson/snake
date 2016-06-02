@@ -132,7 +132,7 @@ def game(screen):
     message3 = "Press SPACE to play again."
     message4 = "Press ESC to quit."
     message5 = "Press M to go back to the menu."
-    screen.addstr(dims[0] // 2 - 3, (dims[1] - len(message1)) // 2, message1)
+    screen.addstr(dims[0] // 2 - 3, (dims[1] - len(message1)) // 2, message1, curses.color_pair(2) | curses.A_REVERSE)
     screen.addstr(dims[0] // 2 - 2, (dims[1] - len(message2)) // 2, message2)
     screen.addstr(dims[0] // 2, (dims[1] - len(message3)) // 2, message3)
     screen.addstr(dims[0] // 2 + 1, (dims[1] - len(message4)) // 2, message4)
