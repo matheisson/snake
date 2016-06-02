@@ -20,9 +20,12 @@ speed = {"Easy": 0.2, "Medium": 0.09, "Hard": 0.05}
 difficulty = "Medium"
 accel = True
 curses.start_color()
-curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_GREEN)
-curses.init_pair(2, curses.COLOR_GREEN, curses.COLOR_BLACK)
-curses.init_pair(3, curses.COLOR_BLACK, curses.COLOR_RED)
+curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
+curses.init_pair(2, curses.COLOR_BLACK, curses.COLOR_RED)
+curses.init_pair(3, 130, curses.COLOR_BLACK)
+curses.init_pair(4, 143, curses.COLOR_BLACK)
+curses.init_pair(5, 34, curses.COLOR_BLACK)
+curses.init_pair(6, 35, curses.COLOR_BLACK)
 
 
 def game(screen):
@@ -36,7 +39,7 @@ def game(screen):
     head = [1, 1]
     body = ([head[:]] * start_length)
     screen.border()
-    screen.addstr(0, (dims[1] - len(title)) // 2, title)
+    screen.addstr(0, (dims[1] - len(title)) // 2, title, curses.color_pair(1))
     direction = 0  # 0-right, 1-down, 2-left, 3, up
     game_over = False
     foodmade = False
@@ -49,7 +52,7 @@ def game(screen):
         timer += (abs(basic_time-0.35))
         timerw = '{0:.2f}'.format(float(timer))
         timer_str = "TIME: " + str(timerw)
-        screen.addstr(0, 62, timer_str)
+        screen.addstr(0, dims[1]-len(timer_str)-5, timer_str, curses.color_pair(1))
         # timer = time.clock()
         # if accel is True:
         #     timer = str(timer) + str(speed[difficulty])
@@ -65,10 +68,11 @@ def game(screen):
                 food_type = ["🐥", "🔰", "🍦"]
                 food_type_index = random.randint(0, 2)
                 # food_pos = y
-                screen.addch(y, x, food_type[food_type_index], curses.color_pair(1))
+                c = random.randint(3, 6)
+                screen.addch(y, x, food_type[food_type_index], curses.color_pair(c))
         if deadcell not in body:
             screen.addch(deadcell[0], deadcell[1], " ")
-        screen.addch(head[0], head[1], "🏮", curses.color_pair(2))
+        screen.addch(head[0], head[1], "🏮", curses.color_pair(1))
 
         action = screen.getch()
         if action == curses.KEY_UP and direction != 1:
@@ -106,7 +110,7 @@ def game(screen):
             if screen.inch(head[0], head[1]) == screen.inch(y, x):
                 # if screen.inch(head[0], head[1]) == ord(food_type[food_type_index]):
                 foodmade = False
-                screen.addstr(head[0], head[1], "*", curses.color_pair(3))
+                screen.addstr(head[0], head[1], "*", curses.color_pair(2))
                 for g in range(growby):
                     body.append(body[-1])
             else:
@@ -118,7 +122,7 @@ def game(screen):
             speed_time = time.sleep(15.0 * speed[difficulty] / len(body))
         score = int(len(body) - start_length)
         score_str = "SCORE: " + str(score)
-        screen.addstr(0, (curses.COLS - len(score_str)) // 7, score_str)
+        screen.addstr(0, (curses.COLS - len(score_str)) // 7, score_str, curses.color_pair(1))
 
     screen.clear()
     screen.nodelay(0)
