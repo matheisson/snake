@@ -6,7 +6,9 @@ import time
 import random
 from operator import itemgetter
 import math
-
+import datetime
+from time import gmtime, strftime
+import timeit
 
 screen = curses.initscr()
 dims = screen.getmaxyx()
@@ -39,8 +41,22 @@ def game(screen):
     game_over = False
     foodmade = False
     deadcell = body[-1][:]
-
+    basic_time = speed[difficulty]
+    speed_time = str(time.sleep(15.0 * speed[difficulty] / len(body)))
+    timer = 0
     while not game_over:
+
+        timer += (abs(basic_time-0.35))
+        timerw = '{0:.2f}'.format(float(timer))
+        timer_str = "TIME: " + str(timerw)
+        screen.addstr(0, 62, timer_str)
+        # timer = time.clock()
+        # if accel is True:
+        #     timer = str(timer) + str(speed[difficulty])
+        # else:
+        #     timer = str(timer) + str(speed_time)
+        # timer_str = "TIME: " + str(timer)
+        # screen.addstr(0, 59, timer_str)
         while not foodmade:
             y, x = random.randrange(
                 1, dims[0] - 1), random.randrange(1, dims[1] - 1)
@@ -48,7 +64,8 @@ def game(screen):
                 foodmade = True
                 food_type = ["🐥", "🔰", "🍦"]
                 food_type_index = random.randint(0, 2)
-                screen.addch(y, x, food_type[food_type_index])
+                # food_pos = y
+                screen.addch(y, x, food_type[food_type_index], curses.color_pair(1))
         if deadcell not in body:
             screen.addch(deadcell[0], deadcell[1], " ")
         screen.addch(head[0], head[1], "🏮", curses.color_pair(2))
@@ -86,7 +103,8 @@ def game(screen):
                 x -= 1
 
         if screen.inch(head[0], head[1]) != ord(" "):
-            if screen.inch(head[0], head[1]) == ord(food_type[food_type_index]):
+            if screen.inch(head[0], head[1]) == screen.inch(y, x):
+                # if screen.inch(head[0], head[1]) == ord(food_type[food_type_index]):
                 foodmade = False
                 screen.addstr(head[0], head[1], "*", curses.color_pair(3))
                 for g in range(growby):
@@ -95,12 +113,13 @@ def game(screen):
                 game_over = True
         screen.refresh()
         if not accel:
-            time.sleep(speed[difficulty])
+            basic_time = time.sleep(speed[difficulty])
         else:
-            time.sleep(15.0 * speed[difficulty] / len(body))
+            speed_time = time.sleep(15.0 * speed[difficulty] / len(body))
         score = int(len(body) - start_length)
         score_str = "SCORE: " + str(score)
         screen.addstr(0, (curses.COLS - len(score_str)) // 7, score_str)
+
     screen.clear()
     screen.nodelay(0)
 
