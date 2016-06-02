@@ -7,6 +7,7 @@ import random
 from operator import itemgetter
 import math
 
+
 screen = curses.initscr()
 dims = screen.getmaxyx()
 
@@ -30,33 +31,28 @@ def game(screen):
     curses.curs_set(0)
     screen.keypad(1)
     curses.start_color()
-    # screen.bkgd(' ', curses.color_pair(2))
     head = [1, 1]
     body = ([head[:]] * start_length)
-    # head1 = [1, 1]
     screen.border()
-
     screen.addstr(0, (dims[1] - len(title)) // 2, title)
     direction = 0  # 0-right, 1-down, 2-left, 3, up
     game_over = False
     foodmade = False
     deadcell = body[-1][:]
-    key = 0
+
     while not game_over:
         while not foodmade:
             y, x = random.randrange(
                 1, dims[0] - 1), random.randrange(1, dims[1] - 1)
             if screen.inch(y, x) == ord(" "):
                 foodmade = True
-#                g = random.randint(1, 3)
                 food_type = ["🐥", "🔰", "🍦"]
                 food_type_index = random.randint(0, 2)
                 screen.addch(y, x, food_type[food_type_index])
         if deadcell not in body:
             screen.addch(deadcell[0], deadcell[1], " ")
-# screen.addch(head[0], head[1], "x", curses.color_pair(g))
-    #    screen.addch(head1[0], head1[1], "🏮")
         screen.addch(head[0], head[1], "🏮", curses.color_pair(2))
+
         action = screen.getch()
         if action == curses.KEY_UP and direction != 1:
             direction = 3
@@ -67,16 +63,7 @@ def game(screen):
         if action == curses.KEY_RIGHT and direction != 2:
             direction = 0
         if action == 27:
-            # exit()
             break
-        # if direction == 0:
-        #     head1[1] += 1
-        # elif direction == 2:
-        #     head1[1] -= 1
-        # elif direction == 1:
-        #     head1[0] += 1
-        # elif direction == 3:
-        #     head1[0] -= 1
 
         if direction == 0:
             head[1] += 1
@@ -98,7 +85,6 @@ def game(screen):
             elif direction == 1:
                 x -= 1
 
-    # addig megy, amíg olyasmibe nem ütközik, ami nem space => fal
         if screen.inch(head[0], head[1]) != ord(" "):
             if screen.inch(head[0], head[1]) == ord(food_type[food_type_index]):
                 foodmade = False
@@ -118,10 +104,10 @@ def game(screen):
     screen.clear()
     screen.nodelay(0)
 
-    message1 = "Game Over Fucker!"
+    message1 = "GAME OVER"
     message2 = "You got " + str(score) + " points."
-    message3 = "Press Space to play again."
-    message4 = "Press Esc to quit."
+    message3 = "Press SPACE to play again."
+    message4 = "Press ESC to quit."
     message5 = "Press M to go back to the menu."
     screen.addstr(dims[0] // 2 - 3, (dims[1] - len(message1)) // 2, message1)
     screen.addstr(dims[0] // 2 - 2, (dims[1] - len(message2)) // 2, message2)
@@ -147,21 +133,18 @@ def menu(screen):
     curses.curs_set(0)
     screen.nodelay(0)
     screen.border()
-    # screen.bkgd(' ', curses.color_pair(1))
     curses.use_default_colors()
     screen.clear()
     selection = -1
     option = 0
     while selection < 0:
-        # This line means graphics will first look like [curses.A_REVERSE, 0, 0, 0, 0]
-        # and the option number will determine where the attribute goes.
         graphics = [0] * 5
         graphics[option] = curses.A_REVERSE
-        screen.addstr(dims[0] // 2 - 2, dims[1] // 2 - 2, "Play", graphics[0])
-        screen.addstr(dims[0] // 2 - 1, dims[1] // 2 - 2, "Info", graphics[1])
-        screen.addstr(dims[0] // 2, dims[1] // 2 - 6, "Game Options", graphics[2])
-        screen.addstr(dims[0] // 2 + 1, dims[1] // 2 - 5, "High Score", graphics[3])
-        screen.addstr(dims[0] // 2 + 2, dims[1] // 2 - 2, "Exit", graphics[4])
+        screen.addstr(dims[0] // 2 - 2, dims[1] // 2 - 2, "PLAY", graphics[0])
+        screen.addstr(dims[0] // 2 - 1, dims[1] // 2 - 2, "INFO", graphics[1])
+        screen.addstr(dims[0] // 2, dims[1] // 2 - 6, "GAME OPTIONS", graphics[2])
+        screen.addstr(dims[0] // 2 + 1, dims[1] // 2 - 5, "HIGH SCORE", graphics[3])
+        screen.addstr(dims[0] // 2 + 2, dims[1] // 2 - 2, "EXIT", graphics[4])
         screen.refresh()
         action = screen.getch()
         if action == curses.KEY_UP:
@@ -205,7 +188,7 @@ def info(screen):
 def gameOptions(screen):
     global start_length, growby, difficulty, accel
     screen.clear()
-    # screen.border()
+    screen.border()
     selection = -1
     option = 0
     while selection < 4:
@@ -271,9 +254,6 @@ def high_scores(screen):
         s = str(i + 1) + "."
         g = int(highest[i])
         screen.addstr(i+5, (dims[1] - len(str(highest[i]))) // 2-2, "{0} {1}".format(s, g))
-        # screen.addstr(i+5, (dims[1] - (int(math.log10(int(highest[i])))+1) // 2-5, "{0} {1}".format(s, g)))
-        # screen.addstr(i+5, (dims[1] - len(highest[i])) // 2-4, "{0} {1}".format(s, str(highest[i])))
-        # screen.addstr(i+5, (dims[1] - len(highest[i])) // 2, str(highest[i]))
         screen.refresh()
     screen.refresh()
     screen.getch()
