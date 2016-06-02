@@ -5,52 +5,61 @@ from curses import KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT
 import time
 import random
 from operator import itemgetter
-import pickle
+import math
+import datetime
+from time import gmtime, strftime
+import timeit
 
 screen = curses.initscr()
 dims = screen.getmaxyx()
-title = " CuRsEsSnAkE "
+
+title = " !WELCOME TO PYTHON! "
 start_length = 5
 growby = 1
-speed = {"Easy": 0.2, "Medium": 0.09, "Hard": 0.05}
+speed = {"Easy": 0.1, "Medium": 0.06, "Hard": 0.01}
 difficulty = "Medium"
 accel = True
+curses.start_color()
+curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
+curses.init_pair(2, curses.COLOR_BLACK, curses.COLOR_RED)
+curses.init_pair(3, 130, curses.COLOR_BLACK)
+curses.init_pair(4, 143, curses.COLOR_BLACK)
+curses.init_pair(5, 34, curses.COLOR_BLACK)
+curses.init_pair(6, 35, curses.COLOR_BLACK)
 
 
 def game(screen):
     screen.clear()
     dims = screen.getmaxyx()
-    # curses.use_default_colors()
+    curses.use_default_colors()
     screen.nodelay(1)
     curses.curs_set(0)
     screen.keypad(1)
+    curses.start_color()
     head = [1, 1]
-    body = [head[:]] * start_length
-    # head1 = [1, 1]
+    body = ([head[:]] * start_length)
     screen.border()
-    curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLUE)
-    curses.init_pair(2, curses.COLOR_RED, curses.COLOR_BLUE)
-    screen.addstr(0, (dims[1] - len(title)) // 2, title)
+    screen.addstr(0, (dims[1] - len(title)) // 2, title, curses.color_pair(1))
     direction = 0  # 0-right, 1-down, 2-left, 3, up
     game_over = False
     foodmade = False
     deadcell = body[-1][:]
-    key = 0
+
     while not game_over:
         while not foodmade:
             y, x = random.randrange(
                 1, dims[0] - 1), random.randrange(1, dims[1] - 1)
             if screen.inch(y, x) == ord(" "):
                 foodmade = True
-#                g = random.randint(1, 3)
-                food_type = ["#", "@", "%"]
-                ff = random.randint(0, 2)
-                screen.addch(y, x, ord(food_type[ff]))
+                food_type = ["🐥", "🔰", "🍦"]
+                food_type_index = random.randint(0, 2)
+                # food_pos = y
+                c = random.randint(3, 6)
+                screen.addch(y, x, food_type[food_type_index], curses.color_pair(c))
         if deadcell not in body:
             screen.addch(deadcell[0], deadcell[1], " ")
-# screen.addch(head[0], head[1], "x", curses.color_pair(g))
-    #    screen.addch(head1[0], head1[1], "█")
-        screen.addch(head[0], head[1], "O", curses.color_pair(1))
+        screen.addch(head[0], head[1], "🏮", curses.color_pair(1))
+
         action = screen.getch()
         if action == curses.KEY_UP and direction != 1:
             direction = 3
@@ -61,29 +70,16 @@ def game(screen):
         if action == curses.KEY_RIGHT and direction != 2:
             direction = 0
         if action == 27:
-            # exit()
             break
-        # if direction == 0:
-        #     head1[1] += 1
-        # elif direction == 2:
-        #     head1[1] -= 1
-        # elif direction == 1:
-        #     head1[0] += 1
-        # elif direction == 3:
-        #     head1[0] -= 1
 
         if direction == 0:
             head[1] += 1
-            # screen.addch(head[0], head[1], "R")
         elif direction == 2:
             head[1] -= 1
-            # screen.addch(head[0], head[1], "R")
         elif direction == 1:
             head[0] += 1
-            # screen.addch(head[0], head[1], "R")
         elif direction == 3:
             head[0] -= 1
-        #screen.addch(head[0], head[1], "█")
 
         deadcell = body[-1][:]
         for z in range(len(body) - 1, 0, -1):
@@ -96,30 +92,33 @@ def game(screen):
             elif direction == 1:
                 x -= 1
 
-    # addig megy, amíg olyasmibe nem ütközik, ami nem space => fal
-        if (screen.addch(head[0], head[1])) != ord(" "):
-            if screen.inch(head[0], head[1]) == ord(food_type[ff]):
+        if screen.inch(head[0], head[1]) != ord(" "):
+            if screen.inch(head[0], head[1]) == screen.inch(y, x):
+                # if screen.inch(head[0], head[1]) == ord(food_type[food_type_index]):
                 foodmade = False
+                screen.addstr(head[0], head[1], "*", curses.color_pair(2))
                 for g in range(growby):
                     body.append(body[-1])
-            # elif (head[0], head[1] == "█"):
-            #     pass
             else:
                 game_over = True
         screen.refresh()
         if not accel:
-            time.sleep(speed[difficulty])
+            basic_time = time.sleep(speed[difficulty])
         else:
-            time.sleep(15.0 * speed[difficulty] / len(body))
+            speed_time = time.sleep(15.0 * speed[difficulty] / len(body))
+        score = int(len(body) - start_length)
+        score_str = "SCORE: " + str(score)
+        screen.addstr(0, (curses.COLS - len(score_str)) // 7, score_str, curses.color_pair(1))
+
     screen.clear()
     screen.nodelay(0)
-    score = (len(body) - start_length)
-    message1 = "Game Over Fucker!"
+
+    message1 = "GAME OVER"
     message2 = "You got " + str(score) + " points."
-    message3 = "Press Space to play again."
-    message4 = "Press Esc to quit."
+    message3 = "Press SPACE to play again."
+    message4 = "Press ESC to quit."
     message5 = "Press M to go back to the menu."
-    screen.addstr(dims[0] // 2 - 3, (dims[1] - len(message1)) // 2, message1)
+    screen.addstr(dims[0] // 2 - 3, (dims[1] - len(message1)) // 2, message1, curses.color_pair(2) | curses.A_REVERSE)
     screen.addstr(dims[0] // 2 - 2, (dims[1] - len(message2)) // 2, message2)
     screen.addstr(dims[0] // 2, (dims[1] - len(message3)) // 2, message3)
     screen.addstr(dims[0] // 2 + 1, (dims[1] - len(message4)) // 2, message4)
@@ -148,15 +147,13 @@ def menu(screen):
     selection = -1
     option = 0
     while selection < 0:
-        # This line means graphics will first look like [curses.A_REVERSE, 0, 0, 0, 0]
-        # and the option number will determine where the attribute goes.
-        graphics = [0] * 6
+        graphics = [0] * 5
         graphics[option] = curses.A_REVERSE
-        screen.addstr(dims[0] // 2 - 2, dims[1] // 2 - 2, "Play", graphics[0])
-        screen.addstr(dims[0] // 2 - 1, dims[1] // 2 - 2, "Info", graphics[1])
-        screen.addstr(dims[0] // 2, dims[1] // 2 - 6, "Game Options", graphics[2])
-        screen.addstr(dims[0] // 2 + 1, dims[1] // 2 - 5, "High Score", graphics[3])
-        screen.addstr(dims[0] // 2 + 2, dims[1] // 2 - 2, "Exit", graphics[4])
+        screen.addstr(dims[0] // 2 - 2, dims[1] // 2 - 2, "PLAY", graphics[0])
+        screen.addstr(dims[0] // 2 - 1, dims[1] // 2 - 2, "INFO", graphics[1])
+        screen.addstr(dims[0] // 2, dims[1] // 2 - 6, "GAME OPTIONS", graphics[2])
+        screen.addstr(dims[0] // 2 + 1, dims[1] // 2 - 5, "HIGH SCORE", graphics[3])
+        screen.addstr(dims[0] // 2 + 2, dims[1] // 2 - 2, "EXIT", graphics[4])
         screen.refresh()
         action = screen.getch()
         if action == curses.KEY_UP:
@@ -165,6 +162,8 @@ def menu(screen):
                 option = (option + 1) % 5
         elif action == ord("\n"):
             selection = option
+        elif action == 27:
+            exit()
     if selection == 0:
         game(screen)
     elif selection == 1:
@@ -179,7 +178,7 @@ def info(screen):
     screen.clear()
     screen.nodelay(0)
     screen.border()
-    infos_top = [" CuRsEsSnAkE "]
+    infos_top = [" !WELCOME TO PYTHON! "]
     infos_center = [
         "Use the arrow keys to move.", "Don't run into the wall, title, or yourself.",
         "Collect food to grow.", "\n", "And remember, that the snake gets longer as well as FASTER."]
@@ -200,7 +199,7 @@ def info(screen):
 def gameOptions(screen):
     global start_length, growby, difficulty, accel
     screen.clear()
-    # screen.border()
+    screen.border()
     selection = -1
     option = 0
     while selection < 4:
@@ -252,20 +251,20 @@ def high_scores(screen):
     screen.clear()
     screen.nodelay(0)
     screen.border()
-    high_score_top = [" CuRsEsSnAkE "]
+    high_score_top = [" !WELCOME TO PYTHON! "]
     for t in range(len(high_score_top)):
         screen.addstr(t + 1, (dims[1] - len(high_score_top[t])) // 2, high_score_top[t])
     with open("high_score.txt") as csvfile:
         readCSV = csv.reader(csvfile)
         highest = []
         for row in readCSV:
+            row = int(row[0])
             highest.append(row)
     highest = (sorted(highest, reverse=True))[:10]
-
     for i in range(len(highest)):
         s = str(i + 1) + "."
-        screen.addstr(i+5, (dims[1] - len(highest[i])) // 2-4, (str(s)))
-        screen.addstr(i+5, (dims[1] - len(highest[i])) // 2, str(highest[i]))
+        g = int(highest[i])
+        screen.addstr(i+5, (dims[1] - len(str(highest[i]))) // 2-2, "{0} {1}".format(s, g))
         screen.refresh()
     screen.refresh()
     screen.getch()
