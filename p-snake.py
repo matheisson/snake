@@ -21,7 +21,7 @@ curses.start_color()
 curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
 curses.init_pair(2, curses.COLOR_BLACK, curses.COLOR_RED)
 curses.init_pair(3, 130, curses.COLOR_BLACK)
-curses.init_pair(4, 143, curses.COLOR_BLACK)
+curses.init_pair(4, 185, curses.COLOR_BLACK)
 curses.init_pair(5, 34, curses.COLOR_BLACK)
 curses.init_pair(6, 35, curses.COLOR_BLACK)
 
@@ -51,9 +51,9 @@ def game(screen):
                 foodmade = True
                 food_type = ["🐥", "🔰", "🍦"]
                 food_type_index = random.randint(0, 2)
-                c = random.randint(3, 6)
+                food_color = random.randint(3, 6)
                 screen.addch(y, x, food_type[food_type_index],
-                             curses.color_pair(c))
+                             curses.color_pair(food_color))
         if deadcell not in body:
             screen.addch(deadcell[0], deadcell[1], " ")
         screen.addch(head[0], head[1], "🏮", curses.color_pair(1))
