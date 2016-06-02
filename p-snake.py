@@ -184,7 +184,7 @@ def info(screen):
         "Collect food to grow.", "\n", "And remember, that the snake gets longer as well as FASTER."]
     infos_bottom = ["Press any key to go back."]
     for t in range(len(infos_top)):
-        screen.addstr(t + 1, (dims[1] - len(infos_top[t])) // 2, infos_top[t])
+        screen.addstr(t + 1, (dims[1] - len(infos_top[t])) // 2, infos_top[t], curses.color_pair(1))
     for z in range(len(infos_center)):
         screen.addstr((dims[0] - len(infos_center)) // 2 + z, (
             dims[1] - len(infos_center[z])) // 2, infos_center[z])
@@ -253,13 +253,19 @@ def high_scores(screen):
     screen.border()
     high_score_top = [" !WELCOME TO PYTHON! "]
     for t in range(len(high_score_top)):
-        screen.addstr(t + 1, (dims[1] - len(high_score_top[t])) // 2, high_score_top[t])
+        screen.addstr(t + 1, (dims[1] - len(high_score_top[t])) // 2, high_score_top[t], curses.color_pair(1))
     with open("high_score.txt") as csvfile:
         readCSV = csv.reader(csvfile)
         highest = []
         for row in readCSV:
-            row = int(row[0])
+            if len(row) > 1:
+                row0 = str(row[0])
+                row1 = str(row[1])
+                row = int(row0 + row1)
+            else:
+                row = int(row[0])
             highest.append(row)
+
     highest = (sorted(highest, reverse=True))[:10]
     for i in range(len(highest)):
         s = str(i + 1) + "."
