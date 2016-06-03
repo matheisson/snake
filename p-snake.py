@@ -14,7 +14,7 @@ dims = screen.getmaxyx()
 title = " !WELCOME TO PYTHON! "
 start_length = 5
 growby = 1
-speed = {"Easy": 0.1, "Medium": 0.06, "Hard": 0.01}
+speed = {"Easy": 0.1, "Medium": 0.05, "Hard": 0.01}
 difficulty = "Medium"
 accel = True
 curses.start_color()
@@ -179,16 +179,13 @@ def info(screen):
     screen.clear()
     screen.nodelay(0)
     screen.border()
-    infos_top = [" !WELCOME TO PYTHON! "]
     infos_center = [
         "Use the arrow keys to move.",
         "Don't run into the wall, title, or yourself.",
         "Collect food to grow.", "\n",
         "And remember, that the snake gets longer as well as FASTER."]
     infos_bottom = ["Press any key to go back."]
-    for t in range(len(infos_top)):
-        screen.addstr(t + 1, (dims[1] - len(infos_top[t])) // 2, infos_top[t],
-                      curses.color_pair(1))
+    screen.addstr(0, (dims[1] - len(title)) // 2, title, curses.color_pair(1))
     for z in range(len(infos_center)):
         screen.addstr((dims[0] - len(infos_center)) // 2 + z, (
             dims[1] - len(infos_center[z])) // 2, infos_center[z])
@@ -256,29 +253,35 @@ def high_scores(screen):
     screen.clear()
     screen.nodelay(0)
     screen.border()
-    high_score_top = [" !WELCOME TO PYTHON! "]
-    for t in range(len(high_score_top)):
-        screen.addstr(t + 1, (dims[1] - len(high_score_top[t])) // 2,
-                      high_score_top[t], curses.color_pair(1))
-    with open("high_score.txt") as csvfile:
-        readCSV = csv.reader(csvfile)
-        highest = []
-        for row in readCSV:
-            if len(row) > 1:
-                row0 = str(row[0])
-                row1 = str(row[1])
-                row = int(row0 + row1)
-            else:
-                row = int(row[0])
-            highest.append(row)
+    screen.addstr(0, (dims[1] - len(title)) // 2, title, curses.color_pair(1))
+    try:
+        with open("high_score.txt") as csvfile:
+            readCSV = csv.reader(csvfile)
+            highest = []
+            for row in readCSV:
+                if len(row) == 3:
+                    row0 = str(row[0])
+                    row1 = str(row[1])
+                    row2 = str(row[2])
+                    row = int(row0 + row1 + row2)
+                elif len(row) == 2:
+                    row0 = str(row[0])
+                    row1 = str(row[1])
+                    row = int(row0 + row1)
+                else:
+                    row = int(row[0])
+                highest.append(row)
 
-    highest = (sorted(highest, reverse=True))[:10]
-    for i in range(len(highest)):
-        s = str(i + 1) + "."
-        g = int(highest[i])
-        screen.addstr(i+5, (dims[1] - len(str(highest[i]))) // 2-2,
-                      "{0} {1}".format(s, g))
+        highest = (sorted(highest, reverse=True))[:10]
+        for i in range(len(highest)):
+            s = str(i + 1) + "."
+            g = int(highest[i])
+            screen.addstr(i+5, (dims[1] - len(str(highest[i]))) // 2-2,
+                          "{0} {1}".format(s, g))
         screen.refresh()
+    except (IndexError, FileNotFoundError) as error:
+        no_entry = "No entry yet."
+        screen.addstr(dims[0]//2, (dims[1]-len(no_entry)) // 2, no_entry)
     screen.refresh()
     screen.getch()
     menu(screen)
